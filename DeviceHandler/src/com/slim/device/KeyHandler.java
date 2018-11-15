@@ -216,10 +216,10 @@ public class KeyHandler implements DeviceKeyHandler {
                 Context.MODE_PRIVATE | Context.MODE_MULTI_PROCESS);
     }
 
-    public boolean handleKeyEvent(KeyEvent event) {
-        if (event.getAction() != KeyEvent.ACTION_UP) {
-            return false;
-        }
+    public KeyEvent handleKeyEvent(KeyEvent event) {
+        //if (event.getAction() != KeyEvent.ACTION_UP) {
+        //    return false;
+        //}
         int scanCode = event.getScanCode();
         boolean isKeySupported = ArrayUtils.contains(sSupportedGestures, scanCode);
         if (isKeySupported && !mEventHandler.hasMessages(GESTURE_REQUEST)) {
@@ -231,7 +231,8 @@ public class KeyHandler implements DeviceKeyHandler {
                 mEventHandler.sendMessage(msg);
             }
         }
-        return isKeySupported;
+        //return isKeySupported;
+        return event;
     }
 
     private Message getMessageForKeyEvent(KeyEvent keyEvent) {
