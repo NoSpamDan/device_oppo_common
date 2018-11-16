@@ -16,12 +16,18 @@
 
 package com.slim.device.settings;
 
+import android.content.res.Resources;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.SwitchPreference;
+import android.provider.Settings;
+import android.text.TextUtils;
+import android.view.MenuItem;
+import android.util.Log;
 
 import com.slim.device.KernelControl;
 import com.slim.device.R;
@@ -30,23 +36,39 @@ import com.slim.device.util.FileUtils;
 public class SliderSettings extends PreferenceActivity
         implements OnPreferenceChangeListener {
 
-    private ListPreference mSliderTop;
-    private ListPreference mSliderMiddle;
-    private ListPreference mSliderBottom;
+    private static final String KEY_SLIDER_MODE_TOP = "slider_mode_top";
+    private static final String KEY_SLIDER_MODE_CENTER = "slider_mode_center";
+    private static final String KEY_SLIDER_MODE_BOTTOM = "slider_mode_bottom";
+
+    private ListPreference mSliderModeTop;
+    private ListPreference mSliderModeCenter;
+    private ListPreference mSliderModeBottom;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.slider_panel);
 
-        mSliderTop = (ListPreference) findPreference("keycode_top_position");
-        mSliderTop.setOnPreferenceChangeListener(this);
+        mSliderModeTop = (ListPreference) findPreference(KEY_SLIDER_MODE_TOP);
+        mSliderModeTop.setOnPreferenceChangeListener(this);
+        int sliderModeTop = getSliderAction(0);
+        int valueIndex = mSliderModeTop.findIndexOfValue(String.valueOf(sliderModeTop));
+        mSliderModeTop.setValueIndex(valueIndex);
+        mSliderModeTop.setSummary(mSliderModeTop.getEntries()[valueIndex]);
 
-        mSliderMiddle = (ListPreference) findPreference("keycode_middle_position");
-        mSliderMiddle.setOnPreferenceChangeListener(this);
+        mSliderModeCenter = (ListPreference) findPreference(KEY_SLIDER_MODE_CENTER);
+        mSliderModeCenter.setOnPreferenceChangeListener(this);
+        int sliderModeCenter = getSliderAction(1);
+        valueIndex = mSliderModeCenter.findIndexOfValue(String.valueOf(sliderModeCenter));
+        mSliderModeCenter.setValueIndex(valueIndex);
+        mSliderModeCenter.setSummary(mSliderModeCenter.getEntries()[valueIndex]);
 
-        mSliderBottom = (ListPreference) findPreference("keycode_bottom_position");
-        mSliderBottom.setOnPreferenceChangeListener(this);
+        mSliderModeBottom = (ListPreference) findPreference(KEY_SLIDER_MODE_BOTTOM);
+        mSliderModeBottom.setOnPreferenceChangeListener(this);
+        int sliderModeBottom = getSliderAction(2);
+        valueIndex = mSliderModeBottom.findIndexOfValue(String.valueOf(sliderModeBottom));
+        mSliderModeBottom.setValueIndex(valueIndex);
+        mSliderModeBottom.setSummary(mSliderModeBottom.getEntries()[valueIndex]);
     }
 
     private void setSummary(ListPreference preference, String file) {
@@ -59,21 +81,67 @@ public class SliderSettings extends PreferenceActivity
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        final String file;
-        if (preference == mSliderTop) {
-            file = KernelControl.KEYCODE_SLIDER_TOP;
-        } else if (preference == mSliderMiddle) {
-            file = KernelControl.KEYCODE_SLIDER_MIDDLE;
-        } else if (preference == mSliderBottom) {
-            file = KernelControl.KEYCODE_SLIDER_BOTTOM;
-        } else {
-            return false;
+       if (preference == mSliderModeTop) {
+            String value = (String) newValue;
+            int sliderMode = Integer.valueOf(value);
+            setSliderAction(0, sliderMode);
+            int valueIndex = mSliderModeTop.findIndexOfValue(value);
+            mSliderModeTop.setSummary(mSliderModeTop.getEntries()[valueIndex]);
         }
-
-        FileUtils.writeLine(file, (String) newValue);
-        setSummary((ListPreference) preference, file);
-
+        if (preference == mSliderModeCenter) {
+            String value = (String) newValue;
+            int sliderMode = Integer.valueOf(value);
+            setSliderAction(1, sliderMode);
+            int valueIndex = mSliderModeCenter.findIndexOfValue(value);
+            mSliderModeCenter.setSummary(mSliderModeCenter.getEntries()[valueIndex]);
+        }
+        if (preference == mSliderModeBottom) {
+            String value = (String) newValue;
+            int sliderMode = Integer.valueOf(value);
+            setSliderAction(2, sliderMode);
+            int valueIndex = mSliderModeBottom.findIndexOfValue(value);
+            mSliderModeBottom.setSummary(mSliderModeBottom.getEntries()[valueIndex]);
+        }
         return true;
+    }
+
+    private int getSliderAction(int position) {
+        String value = Settings.System.getString(getContentResolver(),
+                    Settings.System.BUTTON_EXTRA_KEY_MAPPING);
+        final String defaultValue = "5,3,0";
+
+        if (value == null) {
+            value = defaultValue;
+        } else if (value.indexOf(",") == -1) {
+            value = defaultValue;
+        }
+        try {
+            String[] parts = value.split(",");
+            return Integer.valueOf(parts[position]);
+        } catch (Exception e) {
+        }
+        return 0;
+    }
+
+    private void setSliderAction(int position, int action) {
+        String value = Settings.System.getString(getContentResolver(),
+                    Settings.System.BUTTON_EXTRA_KEY_MAPPING);
+        final String defaultValue = "5,3,0";
+
+        if (value == null) {
+            value = defaultValue;
+        } else if (value.indexOf(",") == -1) {
+            value = defaultValue;
+        }
+        try {
+            String[] parts = value.split(",");
+            parts[position] = String.valueOf(action);
+            String newValue = TextUtils.join(",", parts);
+            Settings.System.putString(getContentResolver(),
+                    Settings.System.BUTTON_EXTRA_KEY_MAPPING, newValue);
+            Log.d("BUTTON_EXTRA_KEY_MAPPING: ", newValue);
+        } catch (Exception e) {
+        }
     }
 
     @Override
@@ -83,8 +151,8 @@ public class SliderSettings extends PreferenceActivity
         // Remove padding around the listview
             getListView().setPadding(0, 0, 0, 0);
 
-        setSummary(mSliderTop, KernelControl.KEYCODE_SLIDER_TOP);
-        setSummary(mSliderMiddle, KernelControl.KEYCODE_SLIDER_MIDDLE);
-        setSummary(mSliderBottom, KernelControl.KEYCODE_SLIDER_BOTTOM);
+        setSummary(mSliderModeTop, KernelControl.KEYCODE_SLIDER_TOP);
+        setSummary(mSliderModeCenter, KernelControl.KEYCODE_SLIDER_MIDDLE);
+        setSummary(mSliderModeBottom, KernelControl.KEYCODE_SLIDER_BOTTOM);
     }
 }
