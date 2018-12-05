@@ -147,12 +147,5 @@ public class SliderSettings extends PreferenceActivity
     @Override
     protected void onResume() {
         super.onResume();
-
-        // Remove padding around the listview
-            getListView().setPadding(0, 0, 0, 0);
-
-        setSummary(mSliderModeTop, KernelControl.KEYCODE_SLIDER_TOP);
-        setSummary(mSliderModeCenter, KernelControl.KEYCODE_SLIDER_MIDDLE);
-        setSummary(mSliderModeBottom, KernelControl.KEYCODE_SLIDER_BOTTOM);
     }
 }

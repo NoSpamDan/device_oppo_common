@@ -24,19 +24,19 @@
             android:title="@string/slider_mode_title_top"
             android:entries="@array/slider_key_action_entries"
             android:entryValues="@array/slider_key_action_values"
-            android:persistent="false" />
+            android:persistent="true" />
         <ListPreference
             android:key="slider_mode_center"
             android:title="@string/slider_mode_title_center"
             android:entries="@array/slider_key_action_entries"
             android:entryValues="@array/slider_key_action_values"
-            android:persistent="false" />
+            android:persistent="true" />
         <ListPreference
             android:key="slider_mode_bottom"
             android:title="@string/slider_mode_title_bottom"
             android:entries="@array/slider_key_action_entries"
             android:entryValues="@array/slider_key_action_values"
-            android:persistent="false" />
+            android:persistent="true" />
 
     </PreferenceCategory>
 
