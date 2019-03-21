@@ -22,6 +22,8 @@ BOARD_HARDWARE_CLASS += \
     hardware/cyanogen/cmhw
 
 # Releasetools
+ifeq ($(filter enchilada fajita,$(TARGET_DEVICE)),)
 TARGET_RECOVERY_UPDATER_LIBS := librecovery_updater_oppo
+endif
 TARGET_RELEASETOOLS_EXTENSIONS := device/oppo/common
 
