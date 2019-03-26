@@ -75,13 +75,17 @@ public class KeyHandler implements DeviceKeyHandler {
     private static final int GESTURE_II_SCANCODE = 251;
     private static final int GESTURE_LEFT_V_SCANCODE = 253;
     private static final int GESTURE_RIGHT_V_SCANCODE = 254;
+    private static final int GESTURE_V_UP_SCANCODE = 255;
+
     private static final int KEY_DOUBLE_TAP = 143;
+
     private static final int KEY_HOME = 102;
     private static final int KEY_BACK = 158;
     private static final int KEY_RECENTS = 580;
-    private static final int KEY_SLIDER_TOP = 601;
+
+    private static final int KEY_SLIDER_TOP = 603;
     private static final int KEY_SLIDER_CENTER = 602;
-    private static final int KEY_SLIDER_BOTTOM = 603;
+    private static final int KEY_SLIDER_BOTTOM = 601;
 
     private static final int[] sSupportedGestures = new int[]{
         GESTURE_CIRCLE_SCANCODE,
@@ -90,6 +94,7 @@ public class KeyHandler implements DeviceKeyHandler {
         GESTURE_II_SCANCODE,
         GESTURE_LEFT_V_SCANCODE,
         GESTURE_RIGHT_V_SCANCODE,
+        GESTURE_V_UP_SCANCODE,
         KEY_SLIDER_TOP,
         KEY_SLIDER_CENTER,
         KEY_SLIDER_BOTTOM
@@ -100,6 +105,7 @@ public class KeyHandler implements DeviceKeyHandler {
         GESTURE_II_SCANCODE,
         GESTURE_LEFT_V_SCANCODE,
         GESTURE_RIGHT_V_SCANCODE,
+        GESTURE_V_UP_SCANCODE,
         KEY_SLIDER_TOP,
         KEY_SLIDER_CENTER,
         KEY_SLIDER_BOTTOM
@@ -112,6 +118,7 @@ public class KeyHandler implements DeviceKeyHandler {
         GESTURE_II_SCANCODE,
         GESTURE_LEFT_V_SCANCODE,
         GESTURE_RIGHT_V_SCANCODE,
+        GESTURE_V_UP_SCANCODE
     };
 
     protected final Context mContext;
@@ -230,8 +237,8 @@ public class KeyHandler implements DeviceKeyHandler {
 
     private void handleKey(int scanCode) {
         switch(scanCode) {
-        case GESTURE_V_SCANCODE:
-            if (DEBUG) Log.i(TAG, "GESTURE_V_SCANCODE");
+        case GESTURE_V_UP_SCANCODE:
+            if (DEBUG) Log.i(TAG, "GESTURE_V_UP_SCANCODE");
             String rearCameraId = getRearCameraId();
             if (rearCameraId != null) {
                 mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION);
@@ -262,6 +269,13 @@ public class KeyHandler implements DeviceKeyHandler {
                 dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_NEXT);
             }
             break;
+        case GESTURE_V_SCANCODE:
+            if (isMusicActive()) {
+                if (DEBUG) Log.i(TAG, "GESTURE_V_SCANCODE");
+                mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION);
+                dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+            }
+                break;
         case KEY_SLIDER_TOP:
             if (DEBUG) Log.i(TAG, "KEY_SLIDER_TOP");
             mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION);
@@ -280,20 +294,25 @@ public class KeyHandler implements DeviceKeyHandler {
         }
     }
 
-    @Override
-    public boolean handleKeyEvent(KeyEvent event) {
+    public KeyEvent handleKeyEvent(KeyEvent event) {
+        int scanCode = event.getScanCode();
+        boolean isKeySupported = ArrayUtils.contains(sSupportedGestures, scanCode);
+        if (!isKeySupported) {
+            return event;
+        }
         if (event.getAction() != KeyEvent.ACTION_UP) {
-            return false;
+            return null;
         }
-
-        boolean isKeySupported = ArrayUtils.contains(sHandledGestures, event.getScanCode());
-        if (isKeySupported) {
-            if (DEBUG) Log.i(TAG, "scanCode=" + event.getScanCode());
+        if (isKeySupported && !mEventHandler.hasMessages(GESTURE_REQUEST)) {
             Message msg = getMessageForKeyEvent(event);
-            mEventHandler.removeMessages(GESTURE_REQUEST);
-            mEventHandler.sendMessage(msg);
+            if (scanCode < MODE_TOTAL_SILENCE && mProximitySensor != null) {
+                mEventHandler.sendMessageDelayed(msg, 200);
+                processEvent(event);
+            } else {
+                mEventHandler.sendMessage(msg);
+            }
         }
-        return isKeySupported;
+        return null;
     }
 
     @Override
