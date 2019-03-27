@@ -49,6 +49,8 @@ import android.view.WindowManagerGlobal;
 import com.android.internal.os.DeviceKeyHandler;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.candy.FileUtils;
+import com.android.internal.util.candy.ActionConstants;
+import com.android.internal.util.candy.Action;
 
 public class KeyHandler implements DeviceKeyHandler {
 
@@ -275,7 +277,7 @@ public class KeyHandler implements DeviceKeyHandler {
                 mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION);
                 dispatchMediaKeyWithWakeLockToAudioService(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
             }
-                break;
+            break;
         case KEY_SLIDER_TOP:
             if (DEBUG) Log.i(TAG, "KEY_SLIDER_TOP");
             mGestureWakeLock.acquire(GESTURE_WAKELOCK_DURATION);
