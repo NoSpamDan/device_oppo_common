@@ -28,8 +28,14 @@
             android:title="@string/gestures_title" >
 
             <Preference
-                android:key="gesture_arrow_down"
-                android:title="@string/gesture_arrow_down_title"
+                android:key="gesture_circle"
+                android:title="@string/gesture_circle_title"
+                android:persistent="false"
+                android:dependency="enable_gestures" />
+
+            <Preference
+                android:key="gesture_double_swipe"
+                android:title="@string/gesture_double_swipe_title"
                 android:persistent="false"
                 android:dependency="enable_gestures" />
 
@@ -52,14 +58,8 @@
                 android:dependency="enable_gestures" />
 
             <Preference
-                android:key="gesture_circle"
-                android:title="@string/gesture_circle_title"
-                android:persistent="false"
-                android:dependency="enable_gestures" />
-
-            <Preference
-                android:key="gesture_double_swipe"
-                android:title="@string/gesture_double_swipe_title"
+                android:key="gesture_arrow_down"
+                android:title="@string/gesture_arrow_down_title"
                 android:persistent="false"
                 android:dependency="enable_gestures" />
 

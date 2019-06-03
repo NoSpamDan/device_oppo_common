@@ -26,6 +26,7 @@ import android.preference.PreferenceManager;
 
 import com.slim.device.KernelControl;
 import com.slim.device.settings.ScreenOffGesture;
+import com.slim.device.settings.SliderSettings;
 import com.slim.device.util.FileUtils;
 
 import java.io.File;
@@ -36,28 +37,27 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, final Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
                 enableComponent(context, ScreenOffGesture.class.getName());
-                SharedPreferences screenOffGestureSharedPreferences = context.getSharedPreferences(
-                        ScreenOffGesture.GESTURE_SETTINGS, Activity.MODE_PRIVATE);
-                KernelControl.enableGestures(
-                        screenOffGestureSharedPreferences.getBoolean(
-                        ScreenOffGesture.PREF_GESTURE_ENABLE, true));
-            }
-/**
-            // Disable slider settings if needed
-            if (!KernelControl.hasSlider()) {
-                disableComponent(context, SliderSettings.class.getName());
-            } else {
-                enableComponent(context, SliderSettings.class.getName());
+            SharedPreferences screenOffGestureSharedPreferences = context.getSharedPreferences(
+                    ScreenOffGesture.GESTURE_SETTINGS, Activity.MODE_PRIVATE);
+            KernelControl.enableGestures(
+                    screenOffGestureSharedPreferences.getBoolean(
+                    ScreenOffGesture.PREF_GESTURE_ENABLE, true));
+        }
 
-                String sliderTop = getPreferenceString(context, "keycode_top_position", "601");
-                String sliderMiddle = getPreferenceString(context, "keycode_middle_position", "602");
-                String sliderBottom = getPreferenceString(context, "keycode_bottom_position", "603");
+        // Disable slider settings if needed
+        if (!KernelControl.hasSlider()) {
+            disableComponent(context, SliderSettings.class.getName());
+        } else {
+            enableComponent(context, SliderSettings.class.getName());
 
-                FileUtils.writeLine(KernelControl.KEYCODE_SLIDER_TOP, sliderTop);
-                FileUtils.writeLine(KernelControl.KEYCODE_SLIDER_MIDDLE, sliderMiddle);
-                FileUtils.writeLine(KernelControl.KEYCODE_SLIDER_BOTTOM, sliderBottom);
-            }
-**/
+            String sliderTop = getPreferenceString(context, "keycode_top_position", "601");
+            String sliderMiddle = getPreferenceString(context, "keycode_middle_position", "602");
+            String sliderBottom = getPreferenceString(context, "keycode_bottom_position", "603");
+
+            FileUtils.writeLine(KernelControl.KEYCODE_SLIDER_TOP, sliderTop);
+            FileUtils.writeLine(KernelControl.KEYCODE_SLIDER_MIDDLE, sliderMiddle);
+            FileUtils.writeLine(KernelControl.KEYCODE_SLIDER_BOTTOM, sliderBottom);
+        }
     }
 
     private String getPreferenceString(Context context, String key, String defaultValue) {
